@@ -46,6 +46,7 @@ import fr.moribus.imageonmap.commands.maptool.ListCommand;
 import fr.moribus.imageonmap.commands.maptool.NewCommand;
 import fr.moribus.imageonmap.commands.maptool.RenameCommand;
 import fr.moribus.imageonmap.commands.maptool.UpdateCommand;
+import fr.moribus.imageonmap.gui.MapDetailGui;
 import fr.moribus.imageonmap.image.ImageIOExecutor;
 import fr.moribus.imageonmap.image.ImageRendererExecutor;
 import fr.moribus.imageonmap.image.MapInitEvent;
@@ -57,7 +58,6 @@ import fr.zcraft.quartzlib.components.gui.Gui;
 import fr.zcraft.quartzlib.components.i18n.I18n;
 import fr.zcraft.quartzlib.core.QuartzPlugin;
 import fr.zcraft.quartzlib.tools.PluginLogger;
-import fr.zcraft.quartzlib.tools.UpdateChecker;
 import java.io.File;
 import java.io.IOException;
 import org.bstats.bukkit.Metrics;
@@ -143,9 +143,9 @@ public final class ImageOnMap extends QuartzPlugin {
         Commands.registerShortcut("maptool", ExploreCommand.class, "maps");
         Commands.registerShortcut("maptool", GiveCommand.class, "givemap");
 
-        if (PluginConfiguration.CHECK_FOR_UPDATES.get()) {
-            UpdateChecker.boot("imageonmap.26585");
-        }
+        // if (PluginConfiguration.CHECK_FOR_UPDATES.get()) {
+        //     UpdateChecker.boot("imageonmap.26585");
+        // }
 
         if (PluginConfiguration.COLLECT_DATA.get()) {
             final Metrics metrics = new Metrics(this,5920);

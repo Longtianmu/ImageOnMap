@@ -269,7 +269,6 @@ public class MapItemManager implements Listener {
             if (frame.getFacing() != BlockFace.UP && frame.getFacing() != BlockFace.DOWN) {
                 frame.setRotation(Rotation.NONE);
             }
-            frame.setRotation(Rotation.NONE);
 
         } else {
             if (frame.getFacing() != BlockFace.UP && frame.getFacing() != BlockFace.DOWN) {

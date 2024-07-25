@@ -36,25 +36,20 @@
 
 package fr.moribus.imageonmap.ui;
 
-import com.google.common.collect.ImmutableMap;
 import fr.moribus.imageonmap.Permissions;
 import fr.moribus.imageonmap.image.MapInitEvent;
 import fr.moribus.imageonmap.map.ImageMap;
 import fr.moribus.imageonmap.map.MapManager;
 import fr.moribus.imageonmap.map.PosterMap;
 import fr.zcraft.quartzlib.components.i18n.I;
-import fr.zcraft.quartzlib.components.nbt.NBT;
-import fr.zcraft.quartzlib.components.nbt.NBTCompound;
-import fr.zcraft.quartzlib.components.nbt.NBTList;
-import fr.zcraft.quartzlib.tools.PluginLogger;
 import fr.zcraft.quartzlib.tools.items.GlowEffect;
 import fr.zcraft.quartzlib.tools.items.ItemStackBuilder;
-import fr.zcraft.quartzlib.tools.reflection.NMSException;
 import fr.zcraft.quartzlib.tools.runners.RunTask;
 import fr.zcraft.quartzlib.tools.text.MessageSender;
 import fr.zcraft.quartzlib.tools.world.FlatLocation;
 import fr.zcraft.quartzlib.tools.world.WorldUtils;
 import java.lang.reflect.Method;
+import java.util.function.Consumer;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
@@ -67,15 +62,12 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.MapMeta;
 
-//TODO rework splatter effect, using ID is far more stable than nbt tags.
-// To update when adding small picture previsualization.
+//TODO To update when adding small picture previsualization.
 public abstract class SplatterMapManager {
     private SplatterMapManager() {
     }
 
     public static ItemStack makeSplatterMap(PosterMap map) {
-
-
         final ItemStack splatter = new ItemStackBuilder(Material.FILLED_MAP).title(ChatColor.GOLD, map.getName())
                 .title(ChatColor.DARK_GRAY, " - ").title(ChatColor.GRAY, I.t("Splatter Map"))
                 .title(ChatColor.DARK_GRAY, " - ")
@@ -140,21 +132,7 @@ public abstract class SplatterMapManager {
      * @return True if the attribute was detected.
      */
     public static boolean hasSplatterAttributes(ItemStack itemStack) {
-
-        try {
-            final NBTCompound nbt = NBT.fromItemStack(itemStack);
-            if (!nbt.containsKey("Enchantments")) {
-                return false;
-            }
-            final Object enchantments = nbt.get("Enchantments");
-            if (!(enchantments instanceof NBTList)) {
-                return false;
-            }
-            return !((NBTList) enchantments).isEmpty();
-        } catch (NMSException e) {
-            PluginLogger.error("Unable to get Splatter Map attribute on item", e);
-            return false;
-        }
+        return GlowEffect.hasGlow(itemStack);
     }
 
     /**
@@ -210,9 +188,9 @@ public abstract class SplatterMapManager {
         if (startFrame.getFacing().equals(BlockFace.DOWN) || startFrame.getFacing().equals(BlockFace.UP)) {
             // If it is on floor or ceiling
             PosterOnASurface surface = new PosterOnASurface();
+            BlockFace bf = WorldUtils.get4thOrientation(player.getLocation());
             FlatLocation startLocation = new FlatLocation(startFrame.getLocation(), startFrame.getFacing());
-            FlatLocation endLocation = startLocation.clone().addH(poster.getColumnCount(), poster.getRowCount(),
-                    WorldUtils.get4thOrientation(player.getLocation()));
+            FlatLocation endLocation = startLocation.clone().addH(poster.getColumnCount(), poster.getRowCount(), bf);
 
             surface.loc1 = startLocation;
             surface.loc2 = endLocation;
@@ -229,7 +207,6 @@ public abstract class SplatterMapManager {
 
             int i = 0;
             for (ItemFrame frame : surface.frames) {
-                BlockFace bf = WorldUtils.get4thOrientation(player.getLocation());
                 int id = poster.getMapIdAtReverseZ(i, bf, startFrame.getFacing());
                 Rotation rot = Rotation.NONE;
                 switch (frame.getFacing()) {
@@ -246,13 +223,9 @@ public abstract class SplatterMapManager {
                 RunTask.later(() -> {
                     addPropertiesToFrames(player, frame);
                     frame.setItem(
-                            new ItemStackBuilder(Material.FILLED_MAP).nbt(ImmutableMap.of("map", id)).craftItem());
+                            new ItemStackBuilder(Material.FILLED_MAP).withMeta((Consumer<MapMeta>) mapMeta ->
+                                    mapMeta.setMapId(id)).craftItem());
                 }, 5L);
-
-                if (i == 0) {
-                    //First map need to be rotate one time CounterClockwise
-                    rot = rot.rotateCounterClockwise();
-                }
 
                 switch (bf) {
                     case NORTH:
@@ -308,7 +281,8 @@ public abstract class SplatterMapManager {
                 RunTask.later(() -> {
                     addPropertiesToFrames(player, frame);
                     frame.setItem(
-                            new ItemStackBuilder(Material.FILLED_MAP).nbt(ImmutableMap.of("map", id)).craftItem());
+                            new ItemStackBuilder(Material.FILLED_MAP).withMeta((Consumer<MapMeta>) mapMeta ->
+                                    mapMeta.setMapId(id)).craftItem());
                 }, 5L);
 
 

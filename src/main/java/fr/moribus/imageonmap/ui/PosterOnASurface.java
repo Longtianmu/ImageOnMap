@@ -129,7 +129,6 @@ public class PosterOnASurface {
                 case EAST:
                 case WEST:
                     loc.addH(1, map.getColumnCount(), bf);//test
-
                     break;
                 case NORTH:
                 case SOUTH:
